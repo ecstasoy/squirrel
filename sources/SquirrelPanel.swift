@@ -58,7 +58,7 @@ final class SquirrelPanel: NSPanel {
     view.currentTheme.linear
   }
   var vertical: Bool {
-    view.currentTheme.vertical
+    view.currentTheme.vertical || detectVerticalText()
   }
   var inlinePreedit: Bool {
     view.currentTheme.inlinePreedit
@@ -313,6 +313,24 @@ final class SquirrelPanel: NSPanel {
       view.lightTheme = SquirrelTheme()
       view.lightTheme.load(config: config, dark: isDark)
     }
+  }
+  
+  func detectVerticalText() -> Bool {
+    if let controller = inputController {
+      guard let client = controller.client() else { return false }
+
+      if let textAttributes = client.attributes(forCharacterIndex: 0, lineHeightRectangle: nil),
+         !textAttributes.isEmpty {
+        
+        if let orientation = textAttributes["IMKTextOrientation"] as? NSNumber {
+          let isVertical = orientation.intValue == 0
+
+          return isVertical
+        }
+      }
+    }
+    
+    return false
   }
 }
 
